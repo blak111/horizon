@@ -45,7 +45,7 @@ class RemoveRouterRule(tables.DeleteAction):
     def allowed(self, request, data=None):
         return True
 
-    def delete(self, request, obj_id):
+    def superdelete(self, request, obj_id):
         LOG.info('HELLO')
         try:
             router_id = self.table.kwargs['router_id']
