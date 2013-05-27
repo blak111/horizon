@@ -46,19 +46,19 @@ class RemoveRouterRule(tables.DeleteAction):
         return True
 
     def delete(self, request, obj_id):
-        LOG.info('FAIL')
-#        try:
-#            router_id = self.table.kwargs['router_id']
-#            api.quantum.router_remove_routerrule(request,
-#                                                 router_id,
-#                                                 rule_id=obj_id)
-#        except:
-#            msg = _('Failed to delete router rule %s') % obj_id
-#            LOG.info(msg)
-#            router_id = self.table.kwargs['router_id']
-#            redirect = reverse(self.failure_url,
-#                               args=[router_id])
-#            exceptions.handle(request, msg, redirect=redirect)
+        LOG.info('HELLO')
+        try:
+            router_id = self.table.kwargs['router_id']
+            api.quantum.router_remove_routerrule(request,
+                                                 router_id,
+                                                 rule_id=obj_id)
+        except:
+            msg = _('Failed to delete router rule %s') % obj_id
+            LOG.info(msg)
+            router_id = self.table.kwargs['router_id']
+            redirect = reverse(self.failure_url,
+                               args=[router_id])
+            exceptions.handle(request, msg, redirect=redirect)
 
 
 class RouterRulesTable(tables.DataTable):
