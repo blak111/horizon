@@ -91,3 +91,4 @@ class PortsTable(tables.DataTable):
         verbose_name = _("Interfaces")
         table_actions = (AddInterface, RemoveInterface)
         row_actions = (RemoveInterface, )
+

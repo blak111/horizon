@@ -31,9 +31,9 @@ from horizon import tables
 from horizon import tabs
 from openstack_dashboard import api
 from .ports.tables import PortsTable
+from .routerrules.tables import RouterRulesTable
 from .forms import CreateForm
 from .tables import RoutersTable
-from .tabs import RouterDetailTabs
 
 
 LOG = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ class IndexView(tables.DataTableView):
 
 
 class DetailView(tables.MultiTableView):
-    table_classes = (PortsTable, )
+    table_classes = (PortsTable, RouterRulesTable,)
     template_name = 'project/routers/detail.html'
     failure_url = reverse_lazy('horizon:project:routers:index')
 
@@ -139,6 +139,17 @@ class DetailView(tables.MultiTableView):
         for p in ports:
             p.set_id_as_name_if_empty()
         return ports
+
+    def get_routerrules_data(self):
+        try:
+            device_id = self.kwargs['router_id']
+            routerrules = api.quantum.routerrule_list(self.request,
+                                          device_id=device_id)
+        except:
+            routerrules = []
+            msg = _('Router rule list can not be retrieved.')
+            exceptions.handle(self.request, msg)
+        return routerrules
 
 
 class CreateView(forms.ModalFormView):

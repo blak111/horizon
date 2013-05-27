@@ -18,7 +18,7 @@ from django.conf.urls.defaults import patterns, url
 
 from .views import (IndexView, CreateView, DetailView)
 from .ports.views import (AddInterfaceView, SetGatewayView)
-
+from .routerrules.views import (AddRouterRuleView)
 
 urlpatterns = patterns('horizon.dashboards.project.routers.views',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -28,6 +28,8 @@ urlpatterns = patterns('horizon.dashboards.project.routers.views',
         name='detail'),
     url(r'^(?P<router_id>[^/]+)/addinterface', AddInterfaceView.as_view(),
         name='addinterface'),
+    url(r'^(?P<router_id>[^/]+)/addrouterrule', AddRouterRuleView.as_view(),
+        name='addrouterrule'),
     url(r'^(?P<router_id>[^/]+)/setgateway',
         SetGatewayView.as_view(),
         name='setgateway'),

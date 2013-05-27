@@ -83,6 +83,14 @@ class Port(QuantumAPIDictWrapper):
             'UP' if apiresource['admin_state_up'] else 'DOWN'
         super(Port, self).__init__(apiresource)
 
+class RouterRule(QuantumAPIDictWrapper):
+    """Wrapper for quantum router rules"""
+
+    def __init__(self, apiresource):
+        apiresource['id']=apiresource['rule_id']
+        apiresource['nexthops']=','.join(apiresource['nexthops'])
+        super(RouterRule, self).__init__(apiresource)
+
 
 class Router(QuantumAPIDictWrapper):
     """Wrapper for quantum routers"""
@@ -347,6 +355,10 @@ def port_list(request, **params):
     ports = quantumclient(request).list_ports(**params).get('ports')
     return [Port(p) for p in ports]
 
+def routerrule_list(request, **params):
+    LOG.debug("routerrule_list(): params=%s" % (params))
+    routerrules = quantumclient(request).list_routerrules(**params).get('routerrules')
+    return [RouterRule(r) for r in routerrules]
 
 def port_get(request, port_id, **params):
     LOG.debug("port_get(): portid=%s, params=%s" % (port_id, params))
@@ -431,3 +443,27 @@ def router_add_gateway(request, router_id, network_id):
 
 def router_remove_gateway(request, router_id):
     quantumclient(request).remove_gateway_router(router_id)
+
+
+def router_remove_routerrule(request, router_id, rule_id=None):
+    body = {'routerrule':[]}
+    quantumclient(request).add_routerrule_router(router_id, body)
+
+def router_add_routerrule(request, router_id='', source='', destination='', action='', nexthops='',existingrules=[]):
+    body = {'routerrule':[{
+	    'source': source,
+	    'destination': destination,
+	    'action': action
+	    }]
+            }
+    if not nexthops=='':
+        body['routerrule'][0]['nexthops']='+'.join(nexthops.split(','))
+    for r in existingrules:
+        existingrule={'source':r['source'],
+                      'destination':r['destination'],
+                      'action':r['action']
+                      }
+        if not r['nexthops']=='':
+           existingrule['nexthops']='+'.join(r['nexthops'].split(','))
+        body['routerrule'].append(existingrule)
+    quantumclient(request).add_routerrule_router(router_id, body)
