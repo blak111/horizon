@@ -19,7 +19,7 @@ Views for managing Quantum Routers.
 """
 
 import logging
-
+import re
 from django import shortcuts
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -31,7 +31,6 @@ from horizon import tables
 from horizon import tabs
 from openstack_dashboard import api
 from .ports.tables import PortsTable
-from .candybars.tables import CandyBarsTable
 from .routerrules.tables import RouterRulesTable
 from .forms import CreateForm
 from .tables import RoutersTable
@@ -92,9 +91,24 @@ class IndexView(tables.DataTableView):
 
 
 class DetailView(tables.MultiTableView):
-    table_classes = (PortsTable, RouterRulesTable, CandyBarsTable, )
+    table_classes = (PortsTable, RouterRulesTable, )
     template_name = 'project/routers/detail.html'
     failure_url = reverse_lazy('horizon:project:routers:index')
+
+    def post(self, request, *args, **kwargs):
+        obj_ids = request.POST.getlist('object_ids')
+        action = request.POST['action']
+        m = action.split('__')[0]
+        if obj_ids == [] and len(action.split('__'))>2:
+            obj_ids.append(action.split('__')[2])
+        if m == 'routerrules':
+            for obj_id in obj_ids:
+                try:
+                    api.quantum.router_remove_routerrule(request, obj_id, **kwargs)
+                except:
+                    exceptions.handle(request,
+                                      _('Unable to delete router rule.'))
+        return self.get(request, *args, **kwargs)
 
     def _get_data(self):
         if not hasattr(self, "_router"):
@@ -152,11 +166,6 @@ class DetailView(tables.MultiTableView):
             exceptions.handle(self.request, msg)
         return routerrules
 
-    def get_candybars_data(self):
-       candybars=[CandyBar(1,'Snickers','Peanut'),
-                  CandyBar(2,'Skittles','Sugar'),
-                  ]
-       return candybars
 
 class CreateView(forms.ModalFormView):
     form_class = CreateForm
@@ -166,8 +175,3 @@ class CreateView(forms.ModalFormView):
 
 
 
-class CandyBar():
-    def __init__(self,id,name,flavor):
-       self.id=id
-       self.name=name
-       self.flavor=flavor

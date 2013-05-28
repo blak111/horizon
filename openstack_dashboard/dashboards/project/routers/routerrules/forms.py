@@ -33,7 +33,7 @@ class AddRouterRule(forms.SelfHandlingForm):
                                   widget=forms.TextInput(), required=True)
     destination = forms.CharField(label=_("Destination"),
                                   widget=forms.TextInput(), required=True)
-    nexthops = forms.CharField(label=_("Next Hop Addresses (comma delimited)"),
+    nexthops = forms.CharField(label=_("Optional: Next Hop Addresses (comma delimited)"),
                                   widget=forms.TextInput(), required=False)
     router_id = forms.CharField(label=_("Router ID"),
                                   widget=forms.TextInput(

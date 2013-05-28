@@ -355,11 +355,6 @@ def port_list(request, **params):
     ports = quantumclient(request).list_ports(**params).get('ports')
     return [Port(p) for p in ports]
 
-def routerrule_list(request, **params):
-    LOG.debug("routerrule_list(): params=%s" % (params))
-    routerrules = quantumclient(request).list_routerrules(**params).get('routerrules')
-    return [RouterRule(r) for r in routerrules]
-
 def port_get(request, port_id, **params):
     LOG.debug("port_get(): portid=%s, params=%s" % (port_id, params))
     port = quantumclient(request).show_port(port_id, **params).get('port')
@@ -445,8 +440,26 @@ def router_remove_gateway(request, router_id):
     quantumclient(request).remove_gateway_router(router_id)
 
 
-def router_remove_routerrule(request, router_id, rule_id=None):
-    body = {'routerrule':[]}
+def routerrule_list(request, **params):
+    LOG.debug("routerrule_list(): params=%s" % (params))
+    routerrules = quantumclient(request).list_routerrules(**params).get('routerrules')
+    return [RouterRule(r) for r in routerrules]
+
+
+def router_remove_routerrule(request, rule_id, **kwargs): 
+    LOG.debug("router_remove_routerrule(): param=%s" %(kwargs))
+    router_id=kwargs['router_id']
+    currentrules = routerrule_list(request,**kwargs)
+    newrules = []
+    for oldrule in currentrules:
+        if not str(oldrule['rule_id']) == rule_id:
+             newrule={'source':oldrule['source'],
+                      'destination':oldrule['destination'],
+                      'action':oldrule['action']}
+             if hasattr(oldrule,'nexthops') and not oldrule['nexthops']=='':
+                newrule['nexthops']=oldrule['nexthops']
+             newrules.append(newrule)
+    body = {'routerrule':newrules}
     quantumclient(request).add_routerrule_router(router_id, body)
 
 def router_add_routerrule(request, router_id='', source='', destination='', action='', nexthops='',existingrules=[]):
