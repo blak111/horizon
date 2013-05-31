@@ -22,7 +22,6 @@ from horizon import tabs
 from horizon import forms
 from horizon import exceptions
 from openstack_dashboard import api
-from .tabs import PortDetailTabs
 from .forms import (AddRouterRule)
 
 

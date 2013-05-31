@@ -102,12 +102,11 @@ class DetailView(tables.MultiTableView):
         if obj_ids == [] and len(action.split('__'))>2:
             obj_ids.append(action.split('__')[2])
         if m == 'routerrules':
-            for obj_id in obj_ids:
-                try:
-                    api.quantum.router_remove_routerrule(request, obj_id, **kwargs)
-                except:
-                    exceptions.handle(request,
-                                      _('Unable to delete router rule.'))
+            try:
+                api.quantum.router_remove_routerrules(request, obj_ids, **kwargs)
+            except:
+                exceptions.handle(request,
+                                  _('Unable to delete router rule.'))
         return self.get(request, *args, **kwargs)
 
     def _get_data(self):

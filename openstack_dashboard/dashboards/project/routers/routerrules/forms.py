@@ -28,13 +28,14 @@ LOG = logging.getLogger(__name__)
 
 
 class AddRouterRule(forms.SelfHandlingForm):
-    action = forms.ChoiceField(label=_("Action"), required=True)
     source = forms.CharField(label=_("Source"),
                                   widget=forms.TextInput(), required=True)
     destination = forms.CharField(label=_("Destination"),
                                   widget=forms.TextInput(), required=True)
-    nexthops = forms.CharField(label=_("Optional: Next Hop Addresses (comma delimited)"),
-                                  widget=forms.TextInput(), required=False)
+    action = forms.ChoiceField(label=_("Action"), required=True)
+    #Uncomment to enable next hop additions
+    #nexthops = forms.CharField(label=_("Optional: Next Hop Addresses (comma delimited)"),
+    #                              widget=forms.TextInput(), required=False)
     router_id = forms.CharField(label=_("Router ID"),
                                   widget=forms.TextInput(
                                     attrs={'readonly': 'readonly'}))
@@ -47,14 +48,14 @@ class AddRouterRule(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
+            if not 'nexthops' in data:
+                data['nexthops']=''
             api.quantum.router_add_routerrule(request,
                                              router_id=data['router_id'],
                                              action=data['action'],
                                              source=data['source'],
                                              destination=data['destination'],
-                                             nexthops=data['nexthops'],
-					     existingrules= api.quantum.routerrule_list(self.request,
-                                                               device_id=data['router_id']))
+                                             nexthops=data['nexthops'])
             msg = _('Router rule added')
             LOG.debug(msg)
             messages.success(request, msg)

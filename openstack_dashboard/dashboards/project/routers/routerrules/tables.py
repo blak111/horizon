@@ -45,26 +45,12 @@ class RemoveRouterRule(tables.DeleteAction):
     def allowed(self, request, data=None):
         return True
 
-    def superdelete(self, request, obj_id):
-        LOG.info('HELLO')
-        try:
-            router_id = self.table.kwargs['router_id']
-            api.quantum.router_remove_routerrule(request,
-                                                 router_id,
-                                                 rule_id=obj_id)
-        except:
-            msg = _('Failed to delete router rule %s') % obj_id
-            LOG.info(msg)
-            router_id = self.table.kwargs['router_id']
-            redirect = reverse(self.failure_url,
-                               args=[router_id])
-            exceptions.handle(request, msg, redirect=redirect)
-
 
 class RouterRulesTable(tables.DataTable):
     source = tables.Column("source", verbose_name=_("Source"))
     destination = tables.Column("destination", verbose_name=_("Destination"))
-    nexthops = tables.Column("nexthops", verbose_name=_("Next Hops"))
+    #Uncomment to enable next hop rules
+    #nexthops = tables.Column("nexthops", verbose_name=_("Next Hops")) 
     action = tables.Column("action", verbose_name=_("Action"))
 
 
