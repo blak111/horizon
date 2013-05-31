@@ -19,7 +19,6 @@ Views for managing Quantum Routers.
 """
 
 import logging
-
 from django import shortcuts
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -31,9 +30,9 @@ from horizon import tables
 from horizon import tabs
 from openstack_dashboard import api
 from .ports.tables import PortsTable
+from .routerrules.tables import RouterRulesTable
 from .forms import CreateForm
 from .tables import RoutersTable
-from .tabs import RouterDetailTabs
 
 
 LOG = logging.getLogger(__name__)
@@ -91,9 +90,23 @@ class IndexView(tables.DataTableView):
 
 
 class DetailView(tables.MultiTableView):
-    table_classes = (PortsTable, )
+    table_classes = (PortsTable, RouterRulesTable, )
     template_name = 'project/routers/detail.html'
     failure_url = reverse_lazy('horizon:project:routers:index')
+
+    def post(self, request, *args, **kwargs):
+        obj_ids = request.POST.getlist('object_ids')
+        action = request.POST['action']
+        m = action.split('__')[0]
+        if obj_ids == [] and len(action.split('__'))>2:
+            obj_ids.append(action.split('__')[2])
+        if m == 'routerrules':
+            try:
+                api.quantum.router_remove_routerrules(request, obj_ids, **kwargs)
+            except:
+                exceptions.handle(request,
+                                  _('Unable to delete router rule.'))
+        return self.get(request, *args, **kwargs)
 
     def _get_data(self):
         if not hasattr(self, "_router"):
@@ -140,8 +153,23 @@ class DetailView(tables.MultiTableView):
             p.set_id_as_name_if_empty()
         return ports
 
+    def get_routerrules_data(self):
+        try:
+            device_id = self.kwargs['router_id']
+            routerrules = api.quantum.routerrule_list(self.request,
+                                          device_id=device_id)
+        except:
+            routerrules = []
+            msg = _('Router rule list can not be retrieved.')
+            exceptions.handle(self.request, msg)
+        return routerrules
+
 
 class CreateView(forms.ModalFormView):
     form_class = CreateForm
     template_name = 'project/routers/create.html'
     success_url = reverse_lazy("horizon:project:routers:index")
+
+
+
+
