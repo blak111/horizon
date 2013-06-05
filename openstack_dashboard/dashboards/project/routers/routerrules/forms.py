@@ -33,8 +33,8 @@ class AddRouterRule(forms.SelfHandlingForm):
     destination = forms.CharField(label=_("Destination"),
                                   widget=forms.TextInput(), required=True)
     action = forms.ChoiceField(label=_("Action"), required=True)
-    #Uncomment to enable next hop additions
-    #nexthops = forms.CharField(label=_("Optional: Next Hop Addresses (comma delimited)"),
+    # Uncomment to enable next hop additions
+    # nexthops = forms.CharField(label=_("Optional: Next Hop Addresses (comma delimited)"),
     #                              widget=forms.TextInput(), required=False)
     router_id = forms.CharField(label=_("Router ID"),
                                   widget=forms.TextInput(
